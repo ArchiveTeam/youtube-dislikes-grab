@@ -1,7 +1,7 @@
 youtube-dislikes-grab
 =============
 
-More information about the archiving project can be found on the ArchiveTeam wiki: [YouTube](http://archiveteam.org/index.php?title=YouTube)
+More information about the archiving project can be found on the ArchiveTeam wiki: [YouTube Dislikes](https://wiki.archiveteam.org/index.php/YouTube#Removal_of_public_video_dislikes_.28December_2021.29)
 
 Setup instructions
 =========================
