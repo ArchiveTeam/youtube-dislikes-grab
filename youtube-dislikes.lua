@@ -52,7 +52,7 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
   if not string.find(url, "youtube") then
     for video_id, _ in pairs(video_ids) do
       table.insert(urls, {
-        url="https://www.youtube.com/youtubei/v1/next?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8"--&video_id=" .. video_id,
+        url="https://www.youtube.com/youtubei/v1/next?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8&video_id=" .. video_id,
         method="POST",
         body_data=JSON:encode({
           context={
@@ -83,7 +83,7 @@ wget.callbacks.write_to_warc = function(url, http_stat)
     return false
   end
   local data = JSON:decode(read_file(http_stat["local_file"]))
-  local video_id = data["currentVideoEndpoint"]["watchEndpoint"]["videoId"]--string.match(url["url"], "video_id=([^&%?=]+)$")
+  local video_id = string.match(url["url"], "video_id=([^&%?=]+)$")
   local dislike_data = data["contents"]["twoColumnWatchNextResults"]["results"]["results"]["contents"]
   for _, d in pairs(dislike_data) do
     d = d["videoPrimaryInfoRenderer"]
