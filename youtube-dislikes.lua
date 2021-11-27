@@ -85,6 +85,12 @@ wget.callbacks.write_to_warc = function(url, http_stat)
   local data = JSON:decode(read_file(http_stat["local_file"]))
   local video_id = string.match(url["url"], "video_id=([^&%?=]+)$")
   local dislike_data = data["contents"]["twoColumnWatchNextResults"]["results"]["results"]["contents"]
+  if not dislike_data then
+    io.stdout:write("Something went wrong getting data.\n")
+    io.stdout:flush()
+    bad_items[video_id] = true
+    return false
+  end
   for _, d in pairs(dislike_data) do
     d = d["videoPrimaryInfoRenderer"]
     if d then
@@ -100,8 +106,8 @@ wget.callbacks.write_to_warc = function(url, http_stat)
     return false
   end
   dislike_data = dislike_data["toggleButtonRenderer"]
-  if not string.match(dislike_data["accessibility"]["label"], "^dislike this video along with [0-9,]+ other people$")
-    or not string.match(dislike_data["defaultText"]["accessibility"]["accessibilityData"]["label"], "^[0-9,]+ dislikes$") then
+  if not string.match(dislike_data["accessibility"]["label"], "^dislike this video along with [0-9,]+ other pe")
+    or not string.match(dislike_data["defaultText"]["accessibility"]["accessibilityData"]["label"], "^[0-9,]*N?o? dislikes?$") then
     io.stdout:write("Found bad dislike data.\n")
     io.stdout:flush()
     bad_items[video_id] = true
