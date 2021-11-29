@@ -57,7 +57,7 @@ if not WGET_AT:
 #
 # Update this each time you make a non-cosmetic change.
 # It will be added to the WARC files and reported to the tracker.
-VERSION = '20211129.03'
+VERSION = '20211129.04'
 USER_AGENT = 'Archive Team'
 TRACKER_ID = 'youtube-dislikes'
 TRACKER_HOST = 'legacy-api.arpa.li'
@@ -341,6 +341,7 @@ class WgetArgs(object):
             else:
                 print('Got bad visitorData token.')
                 visitor_data = None
+            found_existing = False
             if visitor_data is not None:
                 print('Got good visitorData token.')
                 break
