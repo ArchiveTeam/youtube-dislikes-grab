@@ -57,7 +57,7 @@ if not WGET_AT:
 #
 # Update this each time you make a non-cosmetic change.
 # It will be added to the WARC files and reported to the tracker.
-VERSION = '20211129.01'
+VERSION = '20211129.02'
 USER_AGENT = 'Archive Team'
 TRACKER_ID = 'youtube-dislikes'
 TRACKER_HOST = 'legacy-api.arpa.li'
@@ -302,7 +302,6 @@ class WgetArgs(object):
         if found_existing:
             print('Found a previous visitorData key.')
         for i in range(100):
-            print(visitor_data)
             if visitor_data is None:
                 print('Attempting to get visitorData token')
                 response = requests.post(
