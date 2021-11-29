@@ -57,11 +57,11 @@ if not WGET_AT:
 #
 # Update this each time you make a non-cosmetic change.
 # It will be added to the WARC files and reported to the tracker.
-VERSION = '20211127.02'
+VERSION = '20211129.01'
 USER_AGENT = 'Archive Team'
 TRACKER_ID = 'youtube-dislikes'
 TRACKER_HOST = 'legacy-api.arpa.li'
-MULTI_ITEM_SIZE = 500
+MULTI_ITEM_SIZE = 1000
 KEEP_WARC_ON_ABORT = True
 YOUTUBEI_DATA = {
     'context': {
@@ -246,8 +246,13 @@ class WgetArgs(object):
     @classmethod
     def visitor_data(cls, visitor_data=None):
         if visitor_data is None:
+            if cls.VISITOR_DATA is None and os.path.isfile('visitor_data.txt'):
+                with open('visitor_data.txt', 'r') as f:
+                    cls.VISITOR_DATA = f.read().strip()
             return cls.VISITOR_DATA
         cls.VISITOR_DATA = visitor_data
+        with open('visitor_data.txt', 'w') as f:
+            f.write(visitor_data)
         return cls.VISITOR_DATA
 
     def realize(self, item):
@@ -293,7 +298,11 @@ class WgetArgs(object):
         items = item['item_name'].split('\0')
 
         visitor_data = self.visitor_data()
+        found_existing = visitor_data is not None
+        if found_existing:
+            print('Found a previous visitorData key.')
         for i in range(100):
+            print(visitor_data)
             if visitor_data is None:
                 print('Attempting to get visitorData token')
                 response = requests.post(
@@ -309,23 +318,28 @@ class WgetArgs(object):
                     data=json.dumps(YOUTUBEI_DATA)
                 )
                 visitor_data = response.json()['responseContext']['visitorData']
-            video_id = random.choice(items)
-            response = requests.post(
-                'https://www.youtube.com/youtubei/v1/next',
-                params={
-                    'key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8'
-                },
-                headers={
-                    'Content-Type': 'application/json',
-                    'X-Goog-Visitor-Id': visitor_data,
-                    'Accept-Language': 'en-US;q=0.9, en;q=0.8'
-                },
-                data=json.dumps({
-                    **YOUTUBEI_DATA,
-                    'videoId': video_id
-                })
-            )
-            if not re.search('dislike this video along with [0-9,]+ other people', response.text):
+            for _ in range(1 if not found_existing else 10):
+                video_id = random.choice(items)
+                print('Trying', visitor_data, 'on', video_id)
+                response = requests.post(
+                    'https://www.youtube.com/youtubei/v1/next',
+                    params={
+                        'key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8'
+                    },
+                    headers={
+                        'Content-Type': 'application/json',
+                        'X-Goog-Visitor-Id': visitor_data,
+                        'Accept-Language': 'en-US;q=0.9, en;q=0.8'
+                    },
+                    data=json.dumps({
+                        **YOUTUBEI_DATA,
+                        'videoId': video_id
+                    })
+                )
+                if not re.search('dislike this video along with [0-9,]+ other', response.text):
+                    continue
+                break
+            else:
                 print('Got bad visitorData token.')
                 visitor_data = None
             if visitor_data is not None:
@@ -335,6 +349,10 @@ class WgetArgs(object):
             raise Exception('Could not get visitorData key.')
 
         assert visitor_data is not None
+
+        print('Using visitorData key', visitor_data)
+
+        self.visitor_data(visitor_data)
 
         item['visitor_data'] = visitor_data
         item['item_name_komma'] = item['item_name'].replace('\0', ',')
