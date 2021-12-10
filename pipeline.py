@@ -57,7 +57,7 @@ if not WGET_AT:
 #
 # Update this each time you make a non-cosmetic change.
 # It will be added to the WARC files and reported to the tracker.
-VERSION = '20211129.04'
+VERSION = '20211210.01'
 USER_AGENT = 'Archive Team'
 TRACKER_ID = 'youtube-dislikes'
 TRACKER_HOST = 'legacy-api.arpa.li'
@@ -73,6 +73,8 @@ YOUTUBEI_DATA = {
         }
     }
 }
+with open('popular-videos', 'r') as f:
+    POPULAR_VIDEOS = [l.strip() for l in f]
 
 ###########################################################################
 # This section defines project-specific tasks.
@@ -318,7 +320,7 @@ class WgetArgs(object):
                 )
                 visitor_data = response.json()['responseContext']['visitorData']
             for _ in range(1 if not found_existing else 10):
-                video_id = random.choice(items)
+                video_id = random.choice(POPULAR_VIDEOS)
                 print('Trying', visitor_data, 'on', video_id)
                 response = requests.post(
                     'https://www.youtube.com/youtubei/v1/next',
